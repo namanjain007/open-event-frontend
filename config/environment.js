@@ -16,7 +16,10 @@ module.exports = function(environment) {
     rootURL                  : process.env.ROOT_URL || '/',
     locationType             : 'router-scroll',
     historySupportMiddleware : true,
-    EmberENV                 : {
+    mapboxToken              : process.env.MAPBOX_ACCESS_TOKEN,
+    hcaptchaKey              : process.env.HCAPTCHA_SITE_KEY,
+
+    EmberENV: {
       FEATURES: {
         // Here you can enable experimental features on an ember canary build
         // e.g. 'with-controller': true
@@ -28,7 +31,7 @@ module.exports = function(environment) {
     },
 
     APP: {
-      apiHost      : process.env.API_HOST || (environment === 'production' ? 'https://api.eventyay.com' : 'https://open-event-api-dev.herokuapp.com'),
+      apiHost      : process.env.API_HOST || (environment === 'production' ? 'https://api.eventyay.com' : 'https://open-event.dokku.fossasia.org'),
       apiNamespace : process.env.API_NAMESPACE || 'v1',
       version      : process.env.npm_package_version
     },
@@ -55,6 +58,8 @@ module.exports = function(environment) {
       includeScheduler: true
     },
 
+    noCache: process.env.NO_CACHE || 'false',
+
     ifa: {
       enabled : false,
       inline  : false
@@ -64,7 +69,9 @@ module.exports = function(environment) {
       hostWhitelist: [/.+/]
     },
 
-    torii: {}
+    torii: {},
+
+    webAppGenerator: process.env.WEB_APP_GENERATOR_HOST || (environment === 'production' ? 'https://open-event-wsgen.herokuapp.com' : 'https://open-event-wsgen-dev.herokuapp.com')
   };
 
   if (environment === 'production') {
@@ -73,6 +80,12 @@ module.exports = function(environment) {
 
   ENV['ember-simple-auth'] = {
     authorizer: 'authorizer:jwt'
+  };
+
+  ENV['ember-h-captcha'] = {
+    jsUrl   : 'https://hcaptcha.com/1/api.js', // default
+    sitekey : process.env.HCAPTCHA_SITE_KEY,
+    hl      : 'en'
   };
 
   ENV['ember-simple-auth-token'] = {

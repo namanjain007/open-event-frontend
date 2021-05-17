@@ -33,7 +33,7 @@
     </div>
   </h3>
   <div class="ui two column stackable grid">
-    <div class="column">
+    <div class="w-full column">
       <Forms::Wizard::CustomForms::Table
         @fields={{this.fixedFields}} />
     </div>
@@ -46,10 +46,12 @@
       </div>
     </h3>
     <div class="ui two column stackable grid">
-      <div class="column">
+      <div class="w-full column">
         <Forms::Wizard::CustomForms::Table
           @fields={{this.editableFields}}
-          @updateField={{action (mut this.field)}} />
+          @removeField={{action "removeField"}}
+          @updateField={{action (mut this.field)}} 
+        />
       </div>
     </div>
     <Forms::Wizard::CustomFormInput
@@ -64,6 +66,7 @@
 <Forms::Wizard::WizardFooter
     @event={{this.data.event}}
     @loading={{this.loading}}
+    @device={{this.device}}
     @onSaved={{action 'saveForm'}}
     @onSaveDraft={{action 'saveDraft'}}
     @move={{action 'move'}} />

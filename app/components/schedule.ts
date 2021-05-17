@@ -13,6 +13,7 @@ import { next } from '@ember/runloop';
 
 interface ScheduleArgs {
   timezone: string | undefined,
+  isPublic: boolean | undefined,
   event: Event,
   sessions: Session[],
   rooms: Microlocation[]
@@ -68,10 +69,14 @@ export default class Schedule extends Component<ScheduleArgs> {
     return this.args.sessions.map(session => {
       const speakerNames = session.speakers.map((speaker: Speaker) => speaker.name).join(', ');
       const color = session.track.get('color');
+      let sessionEndTime = session.endsAt.tz(this.timezone).format();
+      if (session.endsAt.tz(this.timezone).format() > this.args.event.endsAt.tz(this.timezone).format()) {
+        sessionEndTime = this.args.event.endsAt.tz(this.timezone).format();
+      }
       return {
         title      : `${session.title} | ${speakerNames}`,
         start      : session.startsAt.tz(this.timezone).format(),
-        end        : session.endsAt.tz(this.timezone).format(),
+        end        : sessionEndTime,
         resourceId : session.microlocation.get('id'),
         color,
         textColor  : getTextColor(color),
@@ -119,16 +124,20 @@ export default class Schedule extends Component<ScheduleArgs> {
    * @param calendar Calendar JQuery element
    */
   adjustMinTime(view: FullCalendarView, calendar: JQuery<HTMLElement>): void {
-    if (isTesting || !(view.type === 'agendaDay' || view.type === 'timelineDay')) {return}
-
-    let minTime = '0:00:00';
-    let maxTime = '24:00:00';
-    if (view.start.isSame(this.args.event.startsAt, 'day')) {
-      ({ minTime } = this);
+    if (isTesting || !(view.type === 'timelineDay' || view.type === 'timelineThreeDays')) {return}
+    let min_time = '24:00:00';
+    if (this.args.isPublic === true) {
+      this.args.sessions.map(x => {
+        const z = String(x.startsAt.format('HH:mm:ss'));
+        if (min_time > z) {
+          min_time = z;
+        }
+      });
+    } else {
+      min_time = '0:00:00';
     }
-    if (view.start.isSame(this.args.event.endsAt, 'day')) {
-      ({ maxTime } = this);
-    }
+    const minTime = min_time;
+    const maxTime = '24:00:00';
 
     // To prevent infinite render loop
     if (minTime !== view.options.minTime) {

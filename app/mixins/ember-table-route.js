@@ -1,5 +1,5 @@
 import Mixin from '@ember/object/mixin';
-import { kebabCase } from 'lodash-es';
+import { kebabCase } from 'open-event-frontend/utils/text';
 
 export default Mixin.create({
   queryParams: {
@@ -49,8 +49,8 @@ export default Mixin.create({
   },
 
   applySortFilters(query, params) {
-    if (params.sort_by && params.sort_dir) {
-      query.sort = `${params.sort_dir === 'ASC' ? '-' : ''}${params.sort_by}`;
+    if (params.sort_by) {
+      query.sort = (params.sort_dir === 'DSC' ? '-' : '') + params.sort_by;
     } else {
       delete query.sort;
     }

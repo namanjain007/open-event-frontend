@@ -1,13 +1,18 @@
 import Component from '@ember/component';
 import FormMixin from 'open-event-frontend/mixins/form';
 import { inject as service } from '@ember/service';
+import ENV from 'open-event-frontend/config/environment';
 
 export default Component.extend(FormMixin, {
 
-  identification : '',
-  password       : '',
-  isLoading      : false,
-  router         : service(),
+  identification  : '',
+  password        : '',
+  isLoading       : false,
+  router          : service(),
+  captcha         : false,
+  showHcaptcha    : !!ENV.hcaptchaKey,
+  captchaRendered : false,
+
   getValidationRules() {
     return {
       inline : true,

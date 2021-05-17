@@ -5,7 +5,7 @@
     </div>
     <div class="ui padded segment">
       <h4 class="ui horizontal divider header">
-        <i class="ticket icon"></i>
+        <i class="dollar icon"></i>
         {{t 'Ticket Buyer'}}
       </h4>
       <h4 class="weight-300">
@@ -19,7 +19,7 @@
       <h4 class="weight-300">
         {{t 'Email'}}
       </h4>
-      <span>
+      <span class="word-break">
         {{this.buyer.email}}
       </span>
       {{#if (not-eq this.data.paymentMode 'free')}}

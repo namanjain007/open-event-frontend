@@ -5,6 +5,8 @@ import moment from 'moment';
 
 
 export default class extends Controller.extend(EmberTableControllerMixin) {
+  sort_by = 'order.completed_at';
+  sort_dir = 'DSC';
   get columns() {
     return [
       {
@@ -15,16 +17,29 @@ export default class extends Controller.extend(EmberTableControllerMixin) {
         cellComponent   : 'ui-table/cell/events/view/tickets/attendees/cell-order'
       },
       {
-        name      : 'Ticket Name',
-        width     : 110,
-        valuePath : 'ticket.name'
+        name            : 'Ticket Name',
+        width           : 80,
+        valuePath       : 'ticket.name',
+        headerComponent : 'tables/headers/sort',
+        isSortable      : true
+      },
+      {
+        name            : 'Date and Time',
+        width           : 140,
+        valuePath       : 'order.completed_at',
+        extraValuePaths : ['order'],
+        cellComponent   : 'ui-table/cell/events/view/tickets/attendees/cell-date',
+        headerComponent : 'tables/headers/sort',
+        isSortable      : true
       },
       {
         name            : 'Ticket Price',
+        width           : 90,
         valuePath       : 'ticket.price',
-        width           : 100,
         extraValuePaths : ['event', 'discountCode'],
-        cellComponent   : 'ui-table/cell/events/view/tickets/attendees/cell-price'
+        cellComponent   : 'ui-table/cell/events/view/tickets/attendees/cell-price',
+        headerComponent : 'tables/headers/sort',
+        isSortable      : true
       },
       {
         name      : 'First Name',
@@ -39,12 +54,12 @@ export default class extends Controller.extend(EmberTableControllerMixin) {
       {
         name      : 'Email',
         valuePath : 'email',
-        width     : 160
+        width     : 120
       },
       {
         name            : 'Actions',
         valuePath       : 'id',
-        width           : 130,
+        width           : 90,
         extraValuePaths : ['order', 'isCheckedIn'],
         cellComponent   : 'ui-table/cell/events/view/tickets/attendees/cell-action',
         actions         : {

@@ -6,14 +6,48 @@
       @id="name"
       @value={{this.data.event.name}} />
   </div>
+  <div class="three fields">
+    <div class="field">
+      <PowerSelect
+        @selected={{this.data.event.type}}
+        @allowClear={{true}}
+        @options={{this.data.types}}
+        @placeholder={{t 'Select Event Type'}}
+        @onChange={{action (mut this.data.event.type)}} as |type|>
+          {{t-var type.name}}
+      </PowerSelect>
+    </div>
+    <br/>
+    <div class="field">
+      <PowerSelect
+        @selected={{this.data.event.topic}}
+        @allowClear={{true}}
+        @options={{this.data.topics}}
+        @placeholder={{t 'Select Event Topic'}}
+        @onChange={{action (mut this.data.event.topic)}} as |topic|>
+          {{t-var topic.name}}
+      </PowerSelect>
+    </div>
+    <div class="field">
+      <PowerSelect
+        @selected={{this.data.event.subTopic}}
+        @allowClear={{true}}
+        @options={{this.subTopics}}
+        @placeholder={{t 'Select Event Sub-Topic'}}
+        @onChange={{action (mut this.data.event.subTopic)}} as |subTopic|>
+          {{t-var subTopic.name}}
+      </PowerSelect>
+    </div>
+  </div>
+  <br>
   <div class="ui secondary pointing menu">
     {{#each this.locationMenuItems as |item|}}
-      <a role="button" href="#" class="{{if (eq item this.selectedLocationType) 'active'}} item" onclick={{action (mut this.selectedLocationType) item}}>
-        {{item}}
+      <a role="button" href={{null}} class="{{if (eq item this.selectedLocationType) 'active'}} item" onclick={{action (mut this.selectedLocationType) item}}>
+        {{t-var item}}
       </a>
     {{/each}}
   </div>
-  {{#if (or (eq this.selectedLocationType 'Venue') (eq this.selectedLocationType 'Mixed'))}}
+  {{#if (or (eq this.selectedLocationType 'Venue') (eq this.selectedLocationType 'Hybrid'))}}
     <div class="field">
       <label class="{{if this.isLocationRequired 'required'}}" for="location">{{t 'Location'}}</label>
       <Widgets::Forms::LocationInput
@@ -36,22 +70,23 @@
       </Widgets::Forms::LocationInput>
     </div>
   {{/if}}
-  {{#if (or (eq this.selectedLocationType 'Online') (eq this.selectedLocationType 'Mixed'))}}
-    <Widgets::Forms::LinkInput
-      @hasLinkName={{true}}
-      @fixedName={{true}}
-      @linkName={{t "Live Stream URL"}}
-      @inputId="live_stream_url"
-      @segmentedLink={{this.data.event.segmentedLiveStreamUrl}}
-      @canRemoveItem={{false}} />
-    <Widgets::Forms::LinkInput
-      @hasLinkName={{true}}
-      @fixedName={{true}}
-      @linkName={{t "Webinar URL"}}
-      @inputId="webinar_url"
-      @segmentedLink={{this.data.event.segmentedWebinarUrl}}
-      @canRemoveItem={{false}} />
+  {{#if (or (eq this.selectedLocationType 'Online') (eq this.selectedLocationType 'Hybrid'))}}
+    <div class="{{unless this.device.isMobile 'six wide'}} field">
+      <label>{{t "Live Stream URL"}}</label>
+      <Widgets::Forms::LinkField
+        @inputId="live_stream_url"
+        @value={{this.data.event.liveStreamUrl}}
+        @onChange={{action (mut this.data.event.liveStreamUrl)}} />
+    </div>
+    <div class="{{unless this.device.isMobile 'six wide'}} field">
+      <label>{{t "Webinar URL"}}</label>
+      <Widgets::Forms::LinkField
+        @inputId="webinar_url"
+        @value={{this.data.event.webinarUrl}}
+        @onChange={{action (mut this.data.event.webinarUrl)}} />
+    </div>
   {{/if}}
+ <br>
   <div class="fields">
     <div class="five wide field">
       <label class="required" for="start_date">{{t 'Starts'}}</label>
@@ -111,6 +146,7 @@
       </UiDropdown>
     </div>
   </div>
+ <br>
   <div class="field">
     <label for="description">{{t 'Description'}}</label>
     <Widgets::Forms::RichTextEditor
@@ -174,7 +210,7 @@
   <div class="ui section divider"></div>
     <div class="field">
       <label class="required">{{t 'Ticketing System'}}</label>
-      <div class="ui attached segment {{unless this.data.event.tickets 'center aligned'}}">
+      <div class="ui attached segment {{unless this.data.event.tickets 'center aligned'}} mb-4">
         {{#if this.data.event.tickets}}
           <div class="ui stackable celled five column grid ticket-header">
             <div class="row weight-600">
@@ -198,11 +234,11 @@
               @isExpanded={{if this.data.event.id false true}}
               @timezone={{this.data.event.timezone}}
               @canMoveUp={{not-eq index 0}}
-              @canMoveDown={{not-eq ticket.position (dec this.data.event.tickets.length)}}
-              @moveTicketUp={{action "moveTicket" ticket "up"}}
-              @moveTicketDown={{action "moveTicket" ticket "down"}}
+              @canMoveDown={{not-eq index (dec this.ticketCount)}}
+              @moveTicketUp={{action "moveTicket" ticket index "up"}}
+              @moveTicketDown={{action "moveTicket" ticket index "down"}}
               @removeTicket={{confirm "Are you sure you wish to delete this ticket ?" (action "removeTicket" ticket)}}
-              @ishidden = {{false}} />
+              @ishidden = {{ticket.isHidden}} />
           {{/each}}
         {{else}}
           <h3 class="text muted weight-500">
@@ -279,30 +315,12 @@
     <div class="field">
       <h4>{{t 'Add Payment Details'}}</h4>
       <div class="two fields">
-        <div class="field">
-          <label class="required">{{t 'Select country'}}</label>
-          <UiDropdown
-            @class="search selection"
-            @selected={{this.data.event.paymentCountry}}
-            @forceSelection={{false}}
-            @fullTextSearch={{true}}>
-            <Input
-              @type="hidden"
-              @autocomplete="no"
-              @id="payment_country"
-              @value={{this.data.event.paymentCountry}} />
-            <i class="dropdown icon"></i>
-            <div class="default text">{{t 'Select country'}}</div>
-            <div class="menu">
-              {{#each this.paymentCountries as |paymentCountry|}}
-                <div class="item" data-value="{{paymentCountry.name}}">
-                  <i class="{{lowercase paymentCountry.code}} flag"></i>
-                  {{paymentCountry.name}}
-                </div>
-              {{/each}}
-            </div>
-          </UiDropdown>
-        </div>
+      <CountryDropdown
+        @required={{true}}
+        @paymentCountries={{true}}
+        @placeholder={{t 'Select country'}}
+        @val={{this.data.event.paymentCountry}}
+        @id={{'payment_country'}} />
         <div class="field">
           <label class="required">{{t 'Select currency'}}</label>
           <UiDropdown
@@ -320,7 +338,7 @@
               {{#each this.paymentCurrencies as |paymentCurrency|}}
                 <div class="item" data-value="{{paymentCurrency.code}}">
                   {{paymentCurrency.code}} -
-                  {{paymentCurrency.name}}
+                  {{t-var paymentCurrency.name}}
                   ({{paymentCurrency.symbol}})
                 </div>
               {{/each}}
@@ -477,8 +495,8 @@
           </label>
           <Textarea
             @id="cheque_details"
-            @value={{this.data.event.chequeDetails}} 
-          /> 
+            @value={{this.data.event.chequeDetails}}
+          />
         </div>
       {{/if}}
 
@@ -487,7 +505,7 @@
           <Input
             @type="checkbox"
             @id="payment_by_bank"
-            @checked={{this.data.event.canPayByBank}} 
+            @checked={{this.data.event.canPayByBank}}
           />
           <label for="payment_by_bank">
             {{t 'YES, accept payment by Telegraphic Transfer (TT) / Bank Transfer '}}
@@ -502,7 +520,7 @@
           </label>
           <Textarea
             @id="bank_details"
-            @value={{this.data.event.bankDetails}} 
+            @value={{this.data.event.bankDetails}}
           />
         </div>
       {{/if}}
@@ -526,7 +544,7 @@
           </label>
           <Textarea
             @id="on_site_details"
-            @value={{this.data.event.onsiteDetails}} 
+            @value={{this.data.event.onsiteDetails}}
           />
         </div>
       {{/if}}
@@ -543,7 +561,7 @@
               <div class="header">{{this.data.event.tax.name}}</div>
               {{#if this.data.event.tax.shouldSendInvoice}}
                 <div class="description">
-                  {{t 'Company Name '}}{{this.data.event.tax.registeredCompany}}
+                  {{t 'Organisation Name '}}{{this.data.event.tax.registeredCompany}}
                 </div>
               {{/if}}
               <div class="description">
@@ -575,7 +593,7 @@
             <Input
               @type="checkbox"
               @id="billing_info_mandatory"
-              @checked={{this.data.event.isBillingInfoMandatory}} 
+              @checked={{this.data.event.isBillingInfoMandatory}}
             />
             <label for="billing_info">
               <strong>{{t 'Billing Info'}}:</strong>
@@ -583,57 +601,29 @@
             </label>
           </div>
         </div>
+      <div class="ui hidden divider"></div>
       </div>
     </div>
   {{/if}}
-  <div class="ui section divider"></div>
   <div class="field">
-    <label>{{t 'Event Type'}}</label>
-    <PowerSelect
-      @selected={{this.data.event.type}}
-      @allowClear={{true}}
-      @options={{this.data.types}}
-      @placeholder={{t 'Select Event Type'}}
-      @onChange={{action (mut this.data.event.type)}} as |type|>
-        {{type.name}}
-    </PowerSelect>
+    <label for="description">{{t 'After Order Message'}}</label>
+    <Widgets::Forms::RichTextEditor
+      @textareaId="after_order_message"
+      @value={{this.data.event.afterOrderMessage}} />
   </div>
-  <div class="field">
-    <label>{{t 'Event Topic'}}</label>
-    <PowerSelect
-      @selected={{this.data.event.topic}}
-      @allowClear={{true}}
-      @options={{this.data.topics}}
-      @placeholder={{t 'Select Event Topic'}}
-      @onChange={{action (mut this.data.event.topic)}} as |topic|>
-        {{topic.name}}
-    </PowerSelect>
-  </div>
-  <div class="field">
-    <label>{{t 'Event Sub-topic'}}</label>
-    <PowerSelect
-      @selected={{this.data.event.subTopic}}
-      @allowClear={{true}}
-      @options={{this.subTopics}}
-      @placeholder={{t 'Select Event Sub-Topic'}}
-      @onChange={{action (mut this.data.event.subTopic)}} as |subTopic|>
-        {{subTopic.name}}
-    </PowerSelect>
-  </div>
-  <br>
-  
 </form>
 
 <Modals::TaxInfoModal
   @isOpen={{this.taxModalIsOpen}}
   @tax={{this.data.event.tax}}
-  @hasTaxInfo={{this.data.event.isTaxEnabled}} 
+  @hasTaxInfo={{this.data.event.isTaxEnabled}}
 />
 
 <Forms::Wizard::WizardFooter
   @event={{this.data.event}}
   @loading={{this.loading}}
   @first={{true}}
+  @device={{this.device}}
   @onSaved={{action 'saveForm'}}
   @onSaveDraft={{action 'saveDraft'}}
   @move={{action 'move'}}

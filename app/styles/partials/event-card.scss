@@ -26,6 +26,10 @@
     white-space: nowrap;
     width: 90%;
   }
+
+  .link.item {
+    color: #555 !important;
+  }
 }
 
 .event.wide {
@@ -38,7 +42,7 @@
   }
 
   img {
-    height: 170px !important;
+    height: 190px !important;
     object-fit: cover;
   }
 
@@ -46,4 +50,8 @@
     display: block;
     height: 130px;
   }
+}
+
+.order.card {
+  height: 100px !important;
 }
